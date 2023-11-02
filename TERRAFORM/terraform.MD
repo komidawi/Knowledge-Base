@@ -109,17 +109,17 @@ Locals main use case is to easily change a value in a central place.
    - Example:
      ```tf
         resource "aws_instance" "app" {
-        # ...
-        count           = var.instances_per_subnet * length(module.vpc.private_subnets)
-        subnet_id       = module.vpc.private_subnets[count.index % length(module.vpc.private_subnets)]
-        # ...
-        }
+            # ...
+            count           = var.instances_per_subnet * length(module.vpc.private_subnets)
+            subnet_id       = module.vpc.private_subnets[count.index % length(module.vpc.private_subnets)]
+            # ...
+            }
 
-        module "elb_http" {
-        # ...
-        number_of_instances     = length(aws_instance.app)
-        instances               = aws_instance.app.*.id
-        # ...
+            module "elb_http" {
+            # ...
+            number_of_instances     = length(aws_instance.app)
+            instances               = aws_instance.app.*.id
+            # ...
         }
      ```
 
