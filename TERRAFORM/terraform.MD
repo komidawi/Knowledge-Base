@@ -1,5 +1,19 @@
 # Terraform
 
+- [Terraform](#terraform)
+  - [Variables](#variables)
+  - [Values](#values)
+  - [Secrets](#secrets)
+  - [Environmental variables](#environmental-variables)
+  - [Locals](#locals)
+  - [Outputs](#outputs)
+  - [Data sources](#data-sources)
+  - [Dynamic expressions](#dynamic-expressions)
+    - [splat](#splat)
+    - [count](#count)
+  - [Others](#others)
+
+
 ## Variables
 
 1. Terraform auto-converts variables into target type. \
@@ -79,7 +93,7 @@ Locals main use case is to easily change a value in a central place.
 1. Splat expression captures all objects sharing given attribute.
 2. Without splat expressions, Terraform would return the first item in the array, instead of iterating.
 3. Example
-    ```terraform
+    ```tf
     output "private addresses" {
         description = "Private DNSs for AWS instances"
         value       = aws_instance.ubuntu[*].private_dns
@@ -93,7 +107,7 @@ Locals main use case is to easily change a value in a central place.
 3. You can create a list of all values with a `*`
    - `aws_instance.app.*.id` will be a list of all IDs of instances
    - Example:
-     ```terraform
+     ```tf
         resource "aws_instance" "app" {
         # ...
         count           = var.instances_per_subnet * length(module.vpc.private_subnets)
