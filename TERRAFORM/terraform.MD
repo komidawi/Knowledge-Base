@@ -1,7 +1,9 @@
 # Terraform
 
 - [Terraform](#terraform)
+  - [Syntax](#syntax)
   - [Variables](#variables)
+    - [Best practices](#best-practices)
   - [Values](#values)
   - [Secrets](#secrets)
   - [Environmental variables](#environmental-variables)
@@ -12,6 +14,15 @@
     - [splat](#splat)
     - [count](#count)
   - [Others](#others)
+
+
+## Syntax
+```
+<BLOCK TYPE> "<BLOCK LABEL>" "<BLOCK_LABEL"> {
+   # Block body
+   <IDENTIFIER> = <EXPRESSION> # Argument
+}
+```
 
 
 ## Variables
@@ -31,6 +42,15 @@
 5. Varbiales can be specified inline by `-var` parameter. It can be both simple or more complex values.
     - `terraform apply -var ec2_instance_type=t2.micro`
     - `terraform apply -var='resource_tags={project="project-name",environment="env-name"}'`
+6. Variables can be validated in `validation` block
+
+### Best practices
+
+1. Only parametrize values that will be different e.g. for each instance or environment
+2. Changing a variable with a default value is backward-compatible
+3. Removing a variable is not backward-compatible
+4. For root modules, provide variables in `*.tfvars` file
+5. It's good to include unit in the name, e.g. `ram_size_gb`
 
 ## Values
 
