@@ -13,6 +13,9 @@
   - [Dynamic expressions](#dynamic-expressions)
     - [splat](#splat)
     - [count](#count)
+  - [Modules](#modules)
+  - [State](#state)
+    - [Local state vs remote state](#local-state-vs-remote-state)
   - [Others](#others)
 
 
@@ -143,8 +146,31 @@ Locals main use case is to easily change a value in a central place.
         }
      ```
 
+
+## Modules
+
+1. A module is a collection of configuration files
+2. The root module is the one where other modules and resources are instantiated
+3. Modules let you group a set of resources and reuse them later
+4. Define the reusable code within a module, so that any change you make to the module will be reflected across all the environments that you plan to reuse
+
+## State
+
+### Local state vs remote state
+
+1. No shared access
+   - You have to synchronize manually in order to be up-to-date
+2. No locking
+   - When multiple team members run Terraform at the same time, nothing prevents them from overriding each other work
+3. No confidentiality
+   - State file exposes sensitive data
+
+
 ## Others
 
 1. When running terraform with a local state file, it's stored in `terraform.tfstate` in **plaintext**. It's required to be able to compare if secret values changed.
    - Therefore marking variables as sensitive may be not enough to protect them. You have to secure them also e.g. while passing into Terraform configuration. You may use e.g. Vault for secret management.
-  
+2. Dependency graph
+   1. `terraform graph | dot -Tsvg > graph.svg`
+3. Refreshing state
+   - `terraform refresh`
