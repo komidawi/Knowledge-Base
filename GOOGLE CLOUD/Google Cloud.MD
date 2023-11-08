@@ -1,5 +1,19 @@
 # Google Cloud
 
+- [Google Cloud](#google-cloud)
+  - [Kubernetes](#kubernetes)
+    - [Pod](#pod)
+    - [Deployment](#deployment)
+    - [Service](#service)
+    - [K8s overview](#k8s-overview)
+  - [Cloud Run](#cloud-run)
+  - [VPC](#vpc)
+  - [Commands](#commands)
+    - [Container images](#container-images)
+    - [Buckets](#buckets)
+  - [Storage Options](#storage-options)
+
+
 ## Kubernetes
 
 ### Pod 
@@ -82,3 +96,8 @@
    - `gcloud storage cp my-excellent-blog.png gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png`
 4. Make it readable by everyone
    - `gsutil acl ch -u allUsers:R gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png`
+
+
+## Storage Options
+
+See separate article [here](./STORAGE%20COMPARISON/Storage%20Comparison.MD).
