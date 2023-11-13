@@ -13,6 +13,17 @@
   - [Should I use Microservices?](#should-i-use-microservices)
     - [When rather not](#when-rather-not)
   - [When rather yes](#when-rather-yes)
+- [Chapter 2: How to Model Microservices](#chapter-2-how-to-model-microservices)
+  - [What makes a good Microservice boundary?](#what-makes-a-good-microservice-boundary)
+  - [Types of coupling](#types-of-coupling)
+    - [Domain Coupling](#domain-coupling)
+    - [Temporal Coupling](#temporal-coupling)
+    - [Pass-through coupling](#pass-through-coupling)
+    - [Common coupling](#common-coupling)
+    - [Content coupling](#content-coupling)
+  - [DDD](#ddd)
+    - [Aggregate](#aggregate)
+    - [Bounded Context](#bounded-context)
 - [Source](#source)
 
 
@@ -144,6 +155,108 @@ It will be than a single unit of deployment - **everything** must be deployed to
    - Traffic can vary, so it should scale well
 3. Products delivered via many delivery channels
 
+
+
+# Chapter 2: How to Model Microservices
+
+## What makes a good Microservice boundary?
+
+1. Information hiding
+2. Cohesion (strong)
+   - *The code that changes together, stays together*
+3. Coupling (loose)
+
+
+## Types of coupling
+
+### Domain Coupling
+
+One microservice needs to interact with another one.
+
+   - For example: service #1 uses functionality that is provided by service #2
+   - Although it's unavoidable, we still want to make it as minimal as possible
+     - When you see a service that is coupled with many, many others - it may mean it does too much
+     - It may also mean that logic became centralized
+
+### Temporal Coupling
+
+One service needs another service be operational exactly at the same time.
+
+  - You can avoid it by asynchronous calls
+
+### Pass-through coupling
+
+Service #1 passes data to service #2, only because service #3, further in the chain, will need it.
+
+ - Example: a class defined in service #3 API
+ - One of the most problematic couplings
+ - It may require the calling service to know not only that the second one calls the third one, but also know what data is needed for this call
+ - Problem is that change to the latter microservice will require multiple changes up the stream
+
+Ways to fix it:
+ - Bypass the intermediary
+   - Just call the service #3 directly
+   - However be aware that you increase domain coupling now
+   - Sometimes it may not be great, as it may increase logic in caller service, e.g. when it will have to make more calls
+ - Hide the fact it's a transitive dependency
+   - Instead of sending `com.third.microservice.Data`,  
+   send this data in a flat structure as a part of contract with the service #2
+     - Now if anything changes internally, it may require just changes in service #2, without changes in service #1
+     - But the downside is it may still require all of them to change. 
+       - However not necessarily at the same time, so it's still a value
+ - Make the service #2 treat this dependency data as a blob and don't process it, just pass along
+   - This way we may avoid changes at least in the service #2
+
+### Common coupling
+
+More than one service makes use of the same data
+
+- Example: shared database
+- The main problem is change in data structure may impact many, if not all, clients at once
+- Shared data, by it's nature, is hard to change due to quantity of clients
+- It's somehow less problematic when data
+  - is read-only
+  - is static
+- Big problems happen when multiple services access data often in rw fashion
+- As example, when many services update a status of an order, they may break each other
+  - Imagine case, when statuses can change only in a particular order (finite state machine)
+  - In this scenario either we have logic leaked into many places, have logic in a database or don't have any validation at all
+- Another problem can be locking and synchronization issues
+- Common coupling may be sometimes somehow ok, but pay attention that we will be limited in terms of changing shared data 
+  - It also may speak about a low cohesion level in our system
+  
+Possible fixes
+
+  - Make only one service manage state and become the source of truth
+    - Others will need to call this one in order to make changes to db
+      - By the way, treat requests as requests, not orders - validation should or not allow to make given change
+
+### Content coupling
+
+The worst of the worst:  
+When one microservice reaches another one and changes its internal details
+
+- Example: when one service makes changes in other service's database
+- It's different from Common coupling as there you are aware that data is shared, but here you just tinker with one's private internals
+- If we have a fine logic in calling microservice (duplicated logic, by the way), you may somehow survive
+- But when there are no checks, nothing prevents caller to just make data totally broken
+- And conversely, changes in the internal schema may break the caller 
+- It's a severe leak
+
+
+## DDD
+
+### Aggregate
+
+   - Think about it as of a representation of a real domain concept, like Order, Invoice, Stock item.
+   - Aggregate typically have its own lifecycle
+   - Treat them as self-contained units
+   - Code that handles state transitions should be grouped together (along with the state)
+   - Aggregate can be perceived as something that has: state, identity, lifecycle
+
+### Bounded Context
+
+   - A collection of associated Aggregates, with an explicit interface to the outer world
 
 ---
 
