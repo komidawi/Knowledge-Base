@@ -24,6 +24,22 @@
   - [DDD](#ddd)
     - [Aggregate](#aggregate)
     - [Bounded Context](#bounded-context)
+- [Chapter 3: Splitting the Monolith](#chapter-3-splitting-the-monolith)
+  - [What to split first?](#what-to-split-first)
+  - [Decomposition by layer](#decomposition-by-layer)
+    - [Code First Approach](#code-first-approach)
+    - [Data First Approach](#data-first-approach)
+  - [Useful Decompositional Patterns](#useful-decompositional-patterns)
+    - [Strangler Fig](#strangler-fig)
+    - [Parallel Run](#parallel-run)
+    - [Feature Toggle](#feature-toggle)
+  - [Data Decomposition Concerns](#data-decomposition-concerns)
+    - [Performance](#performance)
+    - [Data Integrity](#data-integrity)
+    - [Transactions](#transactions)
+    - [Tooling](#tooling)
+    - [Appendix: Reporting DB](#appendix-reporting-db)
+  - [More information](#more-information)
 - [Source](#source)
 
 
@@ -257,6 +273,103 @@ When one microservice reaches another one and changes its internal details
 ### Bounded Context
 
    - A collection of associated Aggregates, with an explicit interface to the outer world
+
+
+
+# Chapter 3: Splitting the Monolith
+
+## What to split first?
+
+It depends on the main driver of this change.
+
+App needs to be scaled?
+  - Look at features that limits maximum load a project can handle
+  
+Improve time-to-market?
+  - Detect areas which change most often and determine if they can be extracted as microservices (you can use CodeScene as a helpful tool)
+
+In general, it's a good idea to start splitting from the easiest areas, to gain knowledge, experience and work in an iterative way.  
+By the way when it turns out to be too hard, it may imply splitting would be much harder than previously thought.
+
+## Decomposition by layer
+
+Don't neglect decomposition of user interface. 
+  - Although it may not be perceived as something relevant for microservices, it wouldn't be smart to ignore it.
+  - Sometimes the biggest gains would come from, indeed, UI.
+
+### Code First Approach
+
+- It seems to be easier
+- It may give some short-term benefit
+- If this approach fails, it's not too late 
+  - (in contradiction to DB first approach)
+- However, you must be aware, that you will eventually have to move database
+  - So make some feasibility analysis of such extraction upfront not to waste resources on mission impossible
+
+### Data First Approach
+
+- It's helpful when it's uncertain if data would be possible to extract
+  - So you will be certain after doing it
+- The advantage is you reduce risk by doing the harder part at first
+
+
+## Useful Decompositional Patterns
+
+### Strangler Fig
+
+- Add layer in front of service
+- Make this layer forward traffic into old and new service(s)
+- Extract features and setup traffic
+- Do this step by step until everything is migrated
+
+### Parallel Run
+
+- Run two apps - the old one and the new one
+- Make one working for real, and the second one in dry-run mode
+- Compare results between them
+
+### Feature Toggle
+
+- Mind this patten, as it can be helpful
+
+
+## Data Decomposition Concerns
+
+### Performance
+
+- Relational DBs are perfect in joins between tables
+  - It's done in a rapid manner
+  - But microservices with their distributed nature will require _joins_ across DTOs transported through the network, what will be much, much slower (and probably somehow less functional)
+
+### Data Integrity
+
+- With one DB, it's easy do make data valid as everything happens inside just a one box
+- When data lives in different DBs, nothing may stop us from making them invalid across the entire system
+- You will have to cope with these _unconveniences_
+
+
+### Transactions
+
+- With Relational DBs we have full transaction support
+- Now we will have to deal with distributed environment with eventual consistency, at most
+- Also shift your mindset from ACID into CAP, welcome to a totally new world
+
+### Tooling
+
+- When refactoring code, we have very powerful IDEs
+- When refactoring DB, we are highly limited in these terms
+- In general, Flyway/Liquibase can be helpful
+
+### Appendix: Reporting DB
+
+- There are some cases, when it's totally fine to have Shared DB or when using DB is better suited than REST API calls (like analytic SQL queries)
+- In such case, we can create a dedicated extra DB designed for free access and make service push data from internal storage to this "reporting DB"
+   - It would be fine to add it this gives an opportunity to create DB tailored especially for client's needs, instead of stretching main DB to these purposes
+- Still, treat this DB as any other endpoint and don't break the contract in backward-incompatible way
+
+## More information
+
+- See "Monolith to Microservices" book for much more information about this topic
 
 ---
 
