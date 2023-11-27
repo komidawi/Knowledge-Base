@@ -28,6 +28,8 @@
     - [Kubernetes Object Model](#kubernetes-object-model)
     - [Control Plane](#control-plane)
     - [Nodes](#nodes)
+  - [Commands](#commands-1)
+- [Sources](#sources)
 
 
 ## VPC
@@ -310,3 +312,62 @@ Resources:
   - Maintains network connectivity with Pods in a cluster
   - Things like firewalls, iptables
 
+
+## Commands
+- Connecting kubectl to GKE cluster
+  - `gcloud container clusters get-credentials [CLUSTER_NAME] --region [REGION_NAME]`
+- Some basic commands
+  - `kubectl get pods`
+  - `kubectl describe pod [POD_NAME]`
+  - `kubectl exec [POD_NAME] -- [command]`
+    - `-it` runs interactive shell, so you can work inside the container
+  - `kubectl logs [POD_NAME]`
+- Create kubeconfig file (containing credentials for authentication, providing endpoint details for a given cluster and enabling kubectl communication):
+  - `gcloud container clusters get-credentials $my_cluster --region $my_region`
+  - It creates kubeconfig file located in `~/.kube/config`
+  - BTW: This file can contain info of many clusters. You can check current context with `current-context` property
+- Print kubeconfig
+  - `kubectl config view`
+- Print cluster info
+  - `kubectl cluster-info`
+- Print info of all contexts for kubeconfig
+  - `kubectl config get-contexts`
+- Change active context 
+  - `kubectl config use-context gke_${GOOGLE_CLOUD_PROJECT}_us-central1_autopilot-cluster-1`
+- View resource usage of nodes in the cluster
+  - `kubectl top nodes`
+- View resource usage of pods in the cluster
+  - `kubectl top pods`
+- View details of services in the cluster
+  - `kubectl get services`
+- Enable bash autocompletion for kubectl
+  - `source <(kubectl completion bash)`
+- deploy nginx as a Pod named nginx-one:
+  - `kubectl create deployment --image nginx nginx-one`
+- Copy file
+  - `kubectl cp ~/test.html $my_nginx_pod:/usr/share/nginx/html/test.html`
+- Create a service and expose Pod outside the cluster
+  - `kubectl expose pod $my_nginx_pod --port 80 --type LoadBalancer`
+- Set port forwarding from Cloud Shell to nginx Pod
+  - `kubectl port-forward $another_nginx_pod 10081:80`
+  - This is an easier way to connect to and test container,the other one would be to create a service
+- Display and stream logs
+  - `kubectl logs $another_nginx_pod -f --timestamps`
+
+
+# Sources
+
+Getting Started With Application Development
+https://www.cloudskillsboost.google/paths/19/course_templates/22
+
+Getting Started with Google Kubernetes Engine
+https://www.cloudskillsboost.google/paths/19/course_templates/2
+
+Getting Started with Terraform for Google Cloud
+https://www.cloudskillsboost.google/course_templates/443
+
+Google Cloud Fundamentals: Core Infrastructure
+https://www.cloudskillsboost.google/paths/14/course_templates/60
+
+App Deployment, Debugging, and Performance
+https://www.cloudskillsboost.google/course_templates/43
